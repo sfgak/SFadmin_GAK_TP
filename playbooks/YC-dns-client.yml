@@ -23,9 +23,3 @@
                                nameserver 172.16.168.10
                                options edns0 trust-ad
                                search ru-central1.internal auto.internal sfgak.local
-
-             - name: "Update apt cache"
-               apt:
-                       force_apt_get: true
-                       update_cache: yes
-                       cache_valid_time: 86400 #One day
