@@ -101,7 +101,8 @@
              - name: "Setting nginx web-server as a reverse proxy for just installed Apache web-server"
                blockinfile:
                        path: /etc/nginx/sites-enabled/default
-                       insertafter: 'location / {'
+                       insertafter: 'First attempt to serve'
+                       #regex: "^ location \/ \{$"
                        state: present
                        block: |
                                proxy_pass http://127.0.0.1:8080;
