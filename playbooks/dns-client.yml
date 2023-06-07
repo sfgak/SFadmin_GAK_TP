@@ -1,0 +1,30 @@
+---
+   - hosts: all
+     become: true
+     become_method: sudo
+     tasks:
+             - name: "Remove file (delete file)"
+               ansible.builtin.file:
+                       path: /etc/resolv.conf
+                       state: absent
+             - name: "Create /etc/resolv.conf with a first line"  
+               ansible.builtin.lineinfile:
+                       path: /etc/resolv.conf
+                       line: nameserver 127.0.0.53
+                       create: yes
+             - name: "Setting second DNS server"  
+               ansible.builtin.lineinfile:
+                       path: /etc/resolv.conf
+                       insertafter: EOF #'^\# Hostname\='
+                       line: nameserver 172.16.168.10
+             - name: "Setting DNS search settings"  
+               ansible.builtin.lineinfile:
+                       path: /etc/resolv.conf
+                       insertafter: EOF #'^\# Hostname\='
+                       line: options edns0 trust-ad
+             - name: "Setting domains to search in"
+               ansible.builtin.lineinfile:
+                       path: /etc/resolv.conf
+                       insertafter: EOF #'^\# Hostname\='
+                       line: search ru-central1.internal auto.internal sfgak.local
+
