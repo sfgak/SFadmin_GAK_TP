@@ -7,24 +7,25 @@
                ansible.builtin.file:
                        path: /etc/resolv.conf
                        state: absent
-             - name: "Create /etc/resolv.conf with a first line"  
+             - name: "Create /etc/resolv.conf with a first line 'nameserver 127.0.0.53'"
                ansible.builtin.lineinfile:
                        path: /etc/resolv.conf
                        line: nameserver 127.0.0.53
                        create: yes
-             - name: "Setting second DNS server"  
-               ansible.builtin.lineinfile:
-                       path: /etc/resolv.conf
-                       insertafter: EOF #'^\# Hostname\='
-                       line: nameserver 172.16.168.10
-             - name: "Setting DNS search settings"  
-               ansible.builtin.lineinfile:
-                       path: /etc/resolv.conf
-                       insertafter: EOF #'^\# Hostname\='
-                       line: options edns0 trust-ad
-             - name: "Setting domains to search in"
-               ansible.builtin.lineinfile:
-                       path: /etc/resolv.conf
-                       insertafter: EOF #'^\# Hostname\='
-                       line: search ru-central1.internal auto.internal sfgak.local
 
+             - name: "Setting other DNS client settings"
+               blockinfile:
+                       path: /etc/resolv.conf
+                       #marker: "###"
+                       insertafter: 'nameserver 127.0.0.53'
+                       state: present
+                       block: |
+                               nameserver 172.16.168.10
+                               options edns0 trust-ad
+                               search ru-central1.internal auto.internal sfgak.local
+
+             - name: "Update apt cache"
+               apt:
+                       force_apt_get: true
+                       update_cache: yes
+                       cache_valid_time: 86400 #One day
