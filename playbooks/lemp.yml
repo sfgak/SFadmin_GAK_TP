@@ -95,7 +95,8 @@
              - name: "Setting nginx web-server as a reverse proxy for just installed Apache web-server"
                blockinfile:
                        path: /etc/nginx/sites-enabled/default
-                       insertafter: 'First attempt to serve'
+                       #insertafter: 'First attempt to serve'
+                       insertafter: '^\tlocation / {'
                        #regex: "^ location \/ \{$"
                        state: present
                        block: |
@@ -111,10 +112,8 @@
              - name: "Correct 404 Error while trying .php files"
                ansible.builtin.lineinfile:
                        path: /etc/nginx/sites-enabled/default
-                       #search_string: '*try*'
-                       regexp: "try" #files \\$uri \\$uri\/ =404\\;"
-                       #regex: 'try\_files \$uri \$uri\/ \=404\;'
-                       line: '# Congratulations!!!'
+                       regexp: '^\t\ttry_files \$uri \$uri/ =404;'
+                       line: '### try_files $uri $uri/ =404;'
 
              - name: "Starting and enabling nginx web-server"
                systemd:
