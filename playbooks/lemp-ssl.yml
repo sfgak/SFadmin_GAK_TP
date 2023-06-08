@@ -1,0 +1,84 @@
+---
+   - hosts: all
+     become: true
+     become_method: sudo
+     tasks:
+             - name: "Setting server_name for lemp"
+               ansible.builtin.lineinfile:
+                       path: /etc/nginx/sites-enabled/default
+                       insertafter: "index index.html index.htm index.nginx-debian.html;"
+                       line: "\tserver_name www.{{ domain_name }} {{ domain_name }}; # managed by Certbot"
+
+             - name: "Disabling nginx default server_name"
+               ansible.builtin.lineinfile:
+                       path: /etc/nginx/sites-enabled/default
+                       search_string: "server_name _;"
+                       line: "\t###server_name _;"
+
+             - name: "Setting nginx web-server as a reverse proxy for just installed Apache web-server"
+               ansible.builtin.lineinfile:
+                       path: /etc/nginx/sites-enabled/default
+                       insertafter: 'FastCGI server'
+                       line: "listen [::]:443 ssl ipv6only=on; # managed by Certbot"
+                       ### Certificate works but not with block
+
+             - name: ""
+               ansible.builtin.lineinfile:
+                       path: /etc/nginx/sites-enabled/default
+                       insertafter: 'ipv6only=on'
+                       line: "listen 443 ssl; # managed by Certbot"
+
+             - name: ""
+               ansible.builtin.lineinfile:
+                       path: /etc/nginx/sites-enabled/default
+                       insertafter: 'listen 443 ssl; # managed by Certbot'
+                       line: "ssl_certificate /etc/letsencrypt/certs/fullchain_{{ domain_name }}; # managed by Certbot"
+
+             - name: ""
+               ansible.builtin.lineinfile:
+                       path: /etc/nginx/sites-enabled/default
+                       insertafter: 'ssl_certificate /etc/letsencrypt/certs/fullchain_{{ domain_name }}; # managed by Certbot'
+                       line: "ssl_certificate_key /etc/letsencrypt/keys/{{ domain_name }}.key; # managed by Certbot"
+
+             - name: ""
+               ansible.builtin.lineinfile:
+                       path: /etc/nginx/sites-enabled/default
+                       insertafter: EOF
+                       line: "server {if ($host = www.{{ domain_name }}) { return 301 https://$host$request_uri; } # managed by Certbot"
+
+             - name: ""
+               ansible.builtin.lineinfile:
+                       path: /etc/nginx/sites-enabled/default
+                       insertafter: EOF
+                       line: "if ($host = {{ domain_name }}) { return 301 https://$host$request_uri; } # managed by Certbot"
+
+             - name: ""
+               ansible.builtin.lineinfile:
+                       path: /etc/nginx/sites-enabled/default
+                       insertafter: EOF
+                       line: "listen 80 ;"
+
+             - name: ""
+               ansible.builtin.lineinfile:
+                       path: /etc/nginx/sites-enabled/default
+                       insertafter: EOF
+                       line: "listen [::]:80 ;"
+
+             - name: ""
+               ansible.builtin.lineinfile:
+                       path: /etc/nginx/sites-enabled/default
+                       insertafter: EOF
+                       line: "server_name www.158.160.55.39.nip.io 158.160.55.39.nip.io;"
+
+             - name: ""
+               ansible.builtin.lineinfile:
+                       path: /etc/nginx/sites-enabled/default
+                       insertafter: EOF
+                       line: "return 404; } # managed by Certbot"
+
+             - name: "Restarting nginx web-server to apply changes"
+               systemd:
+                       name: nginx
+                       # Value of "state" must be one of: reloaded, restarted, started, stopped
+                       state: restarted
+
