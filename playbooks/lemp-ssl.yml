@@ -68,7 +68,7 @@
                ansible.builtin.lineinfile:
                        path: /etc/nginx/sites-enabled/default
                        insertafter: EOF
-                       line: "server_name www.158.160.55.39.nip.io 158.160.55.39.nip.io;"
+                       line: "server_name www.{{ domain_name }} {{ domain_name }};"
 
              - name: ""
                ansible.builtin.lineinfile:
