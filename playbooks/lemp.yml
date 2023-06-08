@@ -9,14 +9,29 @@
                        update_cache: yes
                        cache_valid_time: 86400 #One day
 
-             - name: "Installing Apache web-server 2.4 and MySQL Server 8.0"
+             - name: "Installing Apache web-server 2.4"
                apt:
-                       #cache_valid_time: 86400
                        force_apt_get: true
                        update_cache: yes
                        name:
                                - apache2
+                       state: present
+                       install-recommends: yes
+
+             - name: "Installing MySQL Server 8.0"
+               apt:
+                       force_apt_get: true
+                       update_cache: yes
+                       name:
                                - mysql-server
+                       state: present
+                       install-recommends: yes
+
+             - name: "Installing PHP 7.4 and extensions"
+               apt:
+                       force_apt_get: true
+                       update_cache: yes
+                       name:
                                - php7.4
                                - libapache2-mod-php7.4
                                - php7.4-mysql
@@ -28,7 +43,6 @@
                                - php-mbstring
                                - php-xml
                                - php-xmlrpc
-                                 #update_cache: yes
                        state: present
                        install-recommends: yes
 
@@ -95,9 +109,7 @@
              - name: "Setting nginx web-server as a reverse proxy for just installed Apache web-server"
                blockinfile:
                        path: /etc/nginx/sites-enabled/default
-                       #insertafter: 'First attempt to serve'
                        insertafter: '^\tlocation / {'
-                       #regex: "^ location \/ \{$"
                        state: present
                        block: |
                                proxy_pass http://127.0.0.1:8080;
