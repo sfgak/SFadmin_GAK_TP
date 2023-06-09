@@ -83,6 +83,3 @@
                        chain_dest: "{{ letsencrypt_certs_dir }}/chain_{{ domain_name }}.crt"
                        fullchain_dest: "{{ letsencrypt_certs_dir }}/fullchain_{{ domain_name }}"
                        data: "{{ acmechallenge15816032104nipio }}"
-                       #- name: "Print out domain name"
-                       #ansible.builtin.debug:
-                       #msg: Domain name is {{ domain_name }}
