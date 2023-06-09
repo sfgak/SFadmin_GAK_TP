@@ -1,0 +1,136 @@
+---
+   - hosts: all
+     become: true
+     become_method: sudo
+     tasks:
+             - name: Update apt cache
+               apt:
+                       force_apt_get: true
+                       update_cache: yes
+                       cache_valid_time: 86400 #One day
+
+             - name: "Installing Apache web-server 2.4"
+               apt:
+                       force_apt_get: true
+                       update_cache: yes
+                       name:
+                               - apache2
+                       state: present
+                       install-recommends: yes
+
+             - name: "Installing MySQL Server 8.0"
+               apt:
+                       force_apt_get: true
+                       update_cache: yes
+                       name:
+                               - mysql-server
+                       state: present
+                       install-recommends: yes
+
+             - name: "Installing PHP 7.4 and extensions"
+               apt:
+                       force_apt_get: true
+                       update_cache: yes
+                       name:
+                               - php7.4
+                               - libapache2-mod-php7.4
+                               - php7.4-mysql
+                               - php-curl
+                               - php-json
+                               - php-cgi
+                               - php-gd
+                               - php-zip
+                               - php-mbstring
+                               - php-xml
+                               - php-xmlrpc
+                       state: present
+                       install-recommends: yes
+
+             - name: "Changing port number, that Apache is listening to"
+               ansible.builtin.lineinfile:
+                       path: /etc/apache2/ports.conf
+                       regexp: '^Listen 80'
+                       line: Listen 127.0.0.1:8080
+
+             - name: "Changing SSL port number, that Apache is listening to"
+               ansible.builtin.lineinfile:
+                       path: /etc/apache2/ports.conf
+                       search_string: 'Listen 443'
+                       line: Listen 127.0.0.1:8443
+
+             - name: "Changing port number, that default site is placed on a web-server"
+               ansible.builtin.lineinfile:
+                       path: /etc/apache2/sites-enabled/000-default.conf
+                       regexp: '^\<VirtualHost \*\:80\>'
+                       line: <VirtualHost 127.0.0.1:8080>
+
+             - name: "Starting and enabling Apache 2.4 web-server"
+               systemd:
+                       name: apache2
+                       # Value of "enabled" must be one of: yes, no
+                       enabled: yes
+                       # Value of "state" must be one of: reloaded, restarted, started, stopped
+                       state: restarted
+
+             - name: "Starting and enabling MySQL server"
+               systemd:
+                       name: mysql
+                       # Value of "enabled" must be one of: yes, no
+                       enabled: yes
+                       # Value of "state" must be one of: reloaded, restarted, started, stopped
+                       state: restarted
+
+             - name: "Creating phpinfo.php file"
+               ansible.builtin.lineinfile:
+                       path: /var/www/html/phpinfo.php
+                       line: <?php phpinfo(); ?>
+                       create: yes
+
+             - name: "Update apt cache"
+               apt:
+                       force_apt_get: true
+                       update_cache: yes
+                       cache_valid_time: 86400 #One day
+
+             - name: "Installing nginx web-server"
+               apt:
+                       force_apt_get: true
+                       name:
+                               - nginx
+                       state: present
+                       install-recommends: yes
+
+             - name: "Disabling nginx /root directory"
+               ansible.builtin.lineinfile:
+                       path: /etc/nginx/sites-available/default
+                       search_string: 'root /var/www/html;'
+                       line: '###root /var/www/html;'
+             
+             - name: "Setting nginx web-server as a reverse proxy for just installed Apache web-server"
+               blockinfile:
+                       path: /etc/nginx/sites-available/default
+                       insertafter: '^\tlocation / {'
+                       state: present
+                       block: |
+                               proxy_pass http://127.0.0.1:8080;
+                               proxy_set_header Host $host;
+                               proxy_set_header X-Real-IP $remote_addr;
+                               proxy_set_header X-Forwarded-Host $host;
+                               proxy_set_header X-Forwarded-Server $host;
+                               proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                               proxy_set_header X-Forwarded-Proto $scheme;
+                               proxy_set_header X-Server-Address  $server_addr;
+
+             - name: "Correct 404 Error while trying .php files"
+               ansible.builtin.lineinfile:
+                       path: /etc/nginx/sites-available/default
+                       regexp: '^\t\ttry_files \$uri \$uri/ =404;'
+                       line: '### try_files $uri $uri/ =404;'
+
+             - name: "Starting and enabling nginx web-server"
+               systemd:
+                       name: nginx
+                       # Value of "enabled" must be one of: yes, no
+                       enabled: yes
+                       # Value of "state" must be one of: reloaded, restarted, started, stopped
+                       state: restarted
