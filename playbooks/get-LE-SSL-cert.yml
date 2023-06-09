@@ -37,7 +37,7 @@
                        executable: /bin/bash
 
              - name: "Begin Let's Encrypt challenges"
-               #In older verions of Ansible 'acme_sertificate' known as 'letsencrypt':
+               # In older verions of Ansible 'acme_sertificate' known as 'letsencrypt':
                acme_certificate:
                        acme_directory: "{{ acme_directory }}"
                        acme_version: "{{ acme_version }}"
@@ -71,7 +71,7 @@
                        - "www.{{ domain_name }}"
 
              - name: "Complete Let's Encrypt challenges"
-               #In older verions of Ansible 'acme_sertificate' known as 'letsencrypt':
+               # In older verions of Ansible 'acme_sertificate' known as 'letsencrypt':
                acme_certificate:
                        acme_directory: "{{ acme_directory }}"
                        acme_version: "{{ acme_version }}"
