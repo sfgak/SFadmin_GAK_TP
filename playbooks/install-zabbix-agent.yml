@@ -1,0 +1,55 @@
+---
+   - hosts: all
+     become: true
+     become_method: sudo
+     tasks:
+       - name: "Download zabbix repository"
+         ansible.builtin.get_url:
+                 url: https://repo.zabbix.com/zabbix/6.0/ubuntu/pool/main/z/zabbix-release/zabbix-release_6.0-4+ubuntu20.04_all.deb
+                 dest: /root/zabbix-release_6.0-4+ubuntu20.04_all.deb
+                 mode: 0644
+
+       - name: "Ubuntu install zabbix repository"
+         apt: deb="/root/zabbix-release_6.0-4+ubuntu20.04_all.deb"
+
+       - name: "Ubuntu install zabbix-agent 6.0"
+         apt:
+                 update_cache: true
+                 cache_valid_time: 86400
+                 force_apt_get: true
+                 name:
+                         - zabbix-agent
+                 state: present
+                 install-recommends: yes
+
+       - name: "Remove zabbix-agent config file (delete file)"
+         ansible.builtin.file:
+                 path: /etc/zabbix/zabbix_agentd.conf
+                 state: absent
+             
+       - name: "Create /etc/zabbix/zabbix_agentd.conf with a first line 'PidFile=/run/zabbix/zabbix_agentd.pid'"
+         ansible.builtin.lineinfile:
+                 path: /etc/zabbix/zabbix_agentd.conf
+                 line: PidFile=/run/zabbix/zabbix_agentd.pid
+                 create: yes
+
+       - name: "Paste other content of file /etc/zabbix/zabbix_agentd.conf"
+         ansible.builtin.blockinfile:
+                 path: /etc/zabbix/zabbix_agentd.conf         
+                 insertafter: 'PidFile'
+                 state: present
+                 block: |
+                         LogFile=/var/log/zabbix/zabbix_agentd.log
+                         LogFileSize=0
+                         Server=172.16.168.10
+                         ServerActive=172.16.168.10
+                         Hostname=system.uname
+                         Include=/etc/zabbix/zabbix_agentd.d/*.conf
+
+       - name: zabbix-agent systemd
+         systemd:
+               name: zabbix-agent
+               # Value of "enabled" must be one of: yes, no
+               enabled: yes
+               # Value of "state" must be one of: reloaded, restarted, started, stopped
+               state: restarted
