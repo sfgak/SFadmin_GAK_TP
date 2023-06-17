@@ -63,7 +63,9 @@
                        dest: "{{ letsencrypt_certs_dir }}/{{ domain_name }}.crt"
                        fullchain_dest: "{{ letsencrypt_certs_dir }}/fullchain_{{ domain_name }}.crt"
                        remaining_days: 91
-               register: acmechallenge15816096243nipio
+               ### In the variable below, instead of numbers, you must specify the public IP address of the server without dots
+               ### You should also adjust the name of the variable below wherever it is used in this file
+               register: acmechallenge15816032104nipio
 
              - name: "Create .well-known/acme-challenge directory"
                file:
@@ -75,8 +77,8 @@
 
              - name: "Implement http-01 challenge files"
                copy:
-                       content: "{{ acmechallenge15816096243nipio['challenge_data'][item]['http-01']['resource_value'] }}"
-                       dest: "/var/www/html/{{ acmechallenge15816096243nipio['challenge_data'][item]['http-01']['resource'] }}"
+                       content: "{{ acmechallenge15816032104nipio['challenge_data'][item]['http-01']['resource_value'] }}"
+                       dest: "/var/www/html/{{ acmechallenge15816032104nipio['challenge_data'][item]['http-01']['resource'] }}"
                        owner: root
                        group: root
                        mode: u=rw,g=r,o=r
@@ -96,4 +98,4 @@
                        dest: "{{ letsencrypt_certs_dir }}/{{ domain_name }}.crt"
                        chain_dest: "{{ letsencrypt_certs_dir }}/chain_{{ domain_name }}.crt"
                        fullchain_dest: "{{ letsencrypt_certs_dir }}/fullchain_{{ domain_name }}"
-                       data: "{{ acmechallenge15816096243nipio }}"
+                       data: "{{ acmechallenge15816032104nipio }}"
