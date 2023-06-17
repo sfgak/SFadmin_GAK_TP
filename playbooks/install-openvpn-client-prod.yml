@@ -1,0 +1,36 @@
+---
+   - hosts: all
+     become: true
+     become_method: sudo
+     tasks:
+       - name: "Ubuntu install OpenVPN client"
+         apt:
+                 update_cache: true
+                 cache_valid_time: 86400
+                 force_apt_get: true
+                 name:
+                         - openvpn
+                 state: present
+                 install-recommends: yes
+
+       - name: "Remove /etc/openvpn/vpnclient2.conf config file (delete file)"
+         ansible.builtin.file:
+                 path: /etc/openvpn/vpnclient2.conf
+                 state: absent 
+
+       - name: "Copy vpnclient2.conf from Ansible Controller to the vpn client"
+         copy:
+                 src: /etc/openvpn/client/vpnclient2/vpnclient2.conf
+                 dest: /etc/openvpn/vpnclient2.conf
+                 #remote_src: yes
+                 owner: root
+                 group: root
+                 mode: 0644
+
+       - name: "Start and enable OpenVPN service on a VPN client"
+         systemd:
+               name: openvpn@vpnclient2
+               # Value of "enabled" must be one of: yes, no
+               enabled: yes
+               # Value of "state" must be one of: reloaded, restarted, started, stopped
+               state: restarted
