@@ -1,0 +1,30 @@
+---
+   - hosts: all
+     become: true
+     become_method: sudo
+     tasks:
+             - name: append 'NTP=ru.pool.ntp.org 0.ru.pool.ntp.org 1.ru.pool.ntp.org 2.ru.pool.ntp.org' to /etc/systemd/timesyncd.conf
+               ansible.builtin.lineinfile:
+                       path: /etc/systemd/timesyncd.conf
+                       line: "NTP=ru.pool.ntp.org 0.ru.pool.ntp.org 1.ru.pool.ntp.org 2.ru.pool.ntp.org"
+
+             - name: "Setting timezone on a remote host as Europe/Moscow"
+               community.general.timezone:
+                       name: Europe/Moscow
+
+               ###Another one method of setting timezone on a remote host
+             - name: "Set timezone to Europe/Moscow"
+               shell: "timedatectl set-timezone Europe/Moscow"
+               args:
+                       executable: /bin/bash
+
+             - name: "Enable time synchronization via ntp"
+               shell: "timedatectl set-ntp on"
+               args:
+                       executable: /bin/bash
+
+             - name: "Restarting systemd-timesyncd to apply changes"
+               systemd:
+                       name: systemd-timesyncd
+                       # Value of "state" must be one of: reloaded, restarted, started, stopped
+                       state: restarted
