@@ -8,10 +8,10 @@
                        path: /etc/resolv.conf
                        state: absent
              
-             - name: "Create /etc/resolv.conf with a first line 'nameserver 127.0.0.53'"
+             - name: "Create /etc/resolv.conf with a first line 'nameserver 172.16.168.10'"
                ansible.builtin.lineinfile:
                        path: /etc/resolv.conf
-                       line: nameserver 127.0.0.53
+                       line: nameserver 172.16.168.10
                        create: yes
 
              - name: "Setting other DNS client settings"
@@ -19,9 +19,9 @@
                        path: /etc/resolv.conf
                        ### You can use your own marker if you want
                        #marker: "###"
-                       insertafter: 'nameserver 127.0.0.53'
+                       insertafter: 'nameserver 172.16.168.10'
                        state: present
                        block: |
-                               nameserver 172.16.168.10
+                               nameserver 127.0.0.53
                                options edns0 trust-ad
                                search ru-central1.internal auto.internal sfgak.local
