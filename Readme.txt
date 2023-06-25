@@ -43,8 +43,7 @@ domain_name: <Server's public domain name>
 8. Install and configure Zabbix-agent 6.0.18 on production servers. The configuration is sewn into the playbook
 - install-zabbix-agent.yml
 
-9. Install filebeat. For security reasons and because of the different sets of roles on the servers, filebeat is configured manually.
+9. Install filebeat. Due to the different sets of roles on the servers, filebeat is installed and configured automatically, and its modules are enabled and configured manually on remote servers
 - install-filebeat.yml 
 
 Installation and configuration of Ansible, OpenVPN Server, Zabbix server, Filebeat, Grafana, Postfix, Dovecot, bind9, ETC, PostgreSQL, pgadmin was done manually.
-PS. Filebeat is installed via playbook, and its configuration is done manually.
