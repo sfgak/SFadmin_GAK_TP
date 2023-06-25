@@ -1,0 +1,38 @@
+---
+   - hosts: all
+     become: true
+     become_method: sudo
+     tasks:
+       - name: "Copy filebeat 8.7.0 deb packeag to the vpn client"
+         copy:
+                 src: /home/maddaemon/filebeat-8.7.0-amd64.deb
+                 dest: /root/filebeat-8.7.0-amd64.deb
+                 #remote_src: yes
+                 owner: root
+                 group: root
+                 mode: 0644
+
+       - name: "Install filebeat 8.7.0 from deb package"
+         apt: deb="/root/filebeat-8.7.0-amd64.deb"
+
+       - name: "Remove /etc/filebeat/filebeat.yml config file (delete file)"
+         ansible.builtin.file:
+                 path: /etc/filebeat/filebeat.yml
+                 state: absent 
+
+       - name: "Copy filebeat.yml from Ansible Controller to the remote host"
+         copy:
+                 src: /root/filebeat.yml
+                 dest: /etc/filebeat/filebeat.yml
+                 #remote_src: yes
+                 owner: root
+                 group: root
+                 mode: 0644
+
+       - name: "Restarting and enabling filebeat service"
+         systemd:
+                 name: filebeat
+                 # Value of "enabled" must be one of: yes, no
+                 enabled: yes
+                 # Value of "state" must be one of: reloaded, restarted, started, stopped
+                 state: restarted
